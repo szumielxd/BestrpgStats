@@ -10,9 +10,9 @@ public enum ConfigKey {
 	
 	DATABASES("database", DatabaseConfig.deserialize(Collections.emptyMap())),
 	
-	PLAYER_DATA_VARIABLE_CLASS("player.data-variable.class", "metadata|Skript|stats_class"),
-	PLAYER_DATA_VARIABLE_LEVEL("player.data-variable.level", "metadata|Skript|stats_level"),
-	PLAYER_DATA_VARIABLE_ANIHILUS("player.data-variable.anihilus", "metadata|Skript|stats_anihilus"),
+	PLAYER_DATA_VARIABLE_CLASS("player.data-variable.class", "skript|class::%player%"),
+	PLAYER_DATA_VARIABLE_LEVEL("player.data-variable.level", "metadata|Skript|lvl::%player%"),
+	PLAYER_DATA_VARIABLE_ANIHILUS("player.data-variable.anihilus", "placeholderapi|skriptrpg_anihilus"),
 	//
 	PLAYER_DATA_VARIABLE_STRENGTH("player.data-variable.strength", "metadata|Skript|stats_strength"),
 	PLAYER_DATA_VARIABLE_DEXTERITY("player.data-variable.dexterity", "metadata|Skript|stats_dexterity"),

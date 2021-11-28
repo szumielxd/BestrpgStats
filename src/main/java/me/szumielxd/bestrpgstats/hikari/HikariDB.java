@@ -14,6 +14,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import ch.njol.skript.variables.Variables;
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.szumielxd.bestrpgstats.BungeerpgStats;
 import me.szumielxd.bestrpgstats.Config;
 import me.szumielxd.bestrpgstats.ConfigKey;
@@ -209,6 +210,12 @@ public abstract class HikariDB {
 			if (obj instanceof Number) return ((Number) obj).longValue();
 			if (obj instanceof String) try { return Long.parseLong((String) obj); } catch (NumberFormatException e) {}
 			return def;
+		} else if ("placeholderapi".equalsIgnoreCase(type)) {
+			accessor = accessor.replace("%player%", player.getName());
+			final String acc = accessor;
+			return Optional.of(PlaceholderAPI.setPlaceholders(player, accessor)).filter(str -> acc.equalsIgnoreCase(str)).map(str -> {
+				try { Long.parseLong(str); } catch (NumberFormatException e) {} return (Long) null;
+			}).orElse(def);
 		}
 		return def;
 	}
@@ -229,6 +236,10 @@ public abstract class HikariDB {
 			if (obj == null) return def;
 			if (obj instanceof String) return (String) obj;
 			return obj.toString();
+		} else if ("placeholderapi".equalsIgnoreCase(type)) {
+			accessor = accessor.replace("%player%", player.getName());
+			final String acc = accessor;
+			return Optional.of(PlaceholderAPI.setPlaceholders(player, accessor)).filter(str -> acc.equalsIgnoreCase(str)).orElse(def);
 		}
 		return def;
 	}
