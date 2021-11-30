@@ -1,17 +1,19 @@
 package me.szumielxd.bestrpgstats.hikari;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
+import javax.sql.DataSource;
 
+import org.jetbrains.annotations.NotNull;
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.bestrpgstats.BungeerpgStats;
+import me.szumielxd.bestrpgstats.BestrpgStats;
 
 public class MariaDB extends HikariDB {
 
-	public MariaDB(BungeerpgStats plugin, DatabaseConfig dbconfig) {
+	public MariaDB(BestrpgStats plugin, DatabaseConfig dbconfig) {
 		super(plugin, dbconfig);
 	}
 
@@ -50,12 +52,15 @@ public class MariaDB extends HikariDB {
 	 */
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
-		config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
-		config.addDataSourceProperty("serverName", address);
-		config.addDataSourceProperty("port", port);
-		config.addDataSourceProperty("databaseName", database);
-		config.setUsername(user);
-		config.setPassword(password);
+		try {
+			DataSource ds = DataSource.class.cast(this.plugin.getInstance().getJarClassLoader().loadClass("me.szumielxd.bestrpgstats.lib.org.mariadb.jdbc.MariaDbDataSource").getConstructor(String.class, Integer.TYPE, String.class).newInstance(address, port, database));
+			config.setDataSource(ds);
+			//config.addDataSourceProperty("serverName", address);
+			//config.addDataSourceProperty("port", port);
+			//config.addDataSourceProperty("databaseName", database);
+			config.setUsername(user);
+			config.setPassword(password);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) { throw new RuntimeException(e); }
 	}
 
 }

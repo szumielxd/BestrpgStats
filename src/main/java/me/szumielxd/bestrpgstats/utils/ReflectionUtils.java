@@ -1,5 +1,6 @@
 package me.szumielxd.bestrpgstats.utils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ public class ReflectionUtils {
 	public static final Class<?> CraftItemStack = getCraftClass("inventory.CraftItemStack");
 	public static final Method CraftItemStack_asNMSCopy = getMethod(CraftItemStack, "asNMSCopy", ItemStack.class);
 	public static final Class<?> NBTTagCompound = getNMSClass("NBTTagCompound");
+	public static final Class<?> NBTTagList = getNMSClass("NBTTagList");
 	
 	
 	public static Class<?> getCraftClass(String craftPath) {
@@ -48,9 +50,15 @@ public class ReflectionUtils {
 	
 	public static Object getFieldValue(Object obj, String fieldName) {
 		try {
-			return obj.getClass().getField(fieldName).get(obj);
+			Field f = obj.getClass().getDeclaredField(fieldName);
+			f.setAccessible(true);
+			return f.get(obj);
 		} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
-			e.printStackTrace();
+			if (e instanceof NoSuchFieldException) {
+				new RuntimeException(String.format("Cannot find field `%s` in class `%s`", fieldName, obj.getClass()), e).printStackTrace();
+			} else {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}

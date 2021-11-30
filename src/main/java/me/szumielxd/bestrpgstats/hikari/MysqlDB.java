@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.bestrpgstats.BungeerpgStats;
+import me.szumielxd.bestrpgstats.BestrpgStats;
 
 public class MysqlDB extends HikariDB {
 
-	public MysqlDB(BungeerpgStats plugin, DatabaseConfig dbconfig) {
+	public MysqlDB(BestrpgStats plugin, DatabaseConfig dbconfig) {
 		super(plugin, dbconfig);
 	}
 

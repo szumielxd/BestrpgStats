@@ -7,22 +7,28 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
+
+import com.google.gson.JsonObject;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import ch.njol.skript.variables.Variables;
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.szumielxd.bestrpgstats.BungeerpgStats;
+import me.szumielxd.bestrpgstats.BestrpgStats;
 import me.szumielxd.bestrpgstats.Config;
 import me.szumielxd.bestrpgstats.ConfigKey;
+import me.szumielxd.bestrpgstats.utils.MiscUtils;
+import me.szumielxd.bestrpgstats.utils.NBTUtils;
 
 public abstract class HikariDB {
 	
 	
-	protected final BungeerpgStats plugin;
+	protected final BestrpgStats plugin;
 	protected final DatabaseConfig dbconfig;
 	protected HikariDataSource hikari;
 	
@@ -37,7 +43,7 @@ public abstract class HikariDB {
 	}
 	
 	
-	public HikariDB(BungeerpgStats plugin, DatabaseConfig dbconfig) {
+	public HikariDB(BestrpgStats plugin, DatabaseConfig dbconfig) {
 		this.plugin = plugin;
 		this.dbconfig = dbconfig;
 		
@@ -169,79 +175,80 @@ public abstract class HikariDB {
 					stm.setString(index++, player.getName());
 					stm.setString(index++, player.getUniqueId().toString());
 					
-					stm.setString(index++, getDataStringValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_CLASS), ""));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LEVEL), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_ANIHILUS), 0L));
+					stm.setString(index++, MiscUtils.getDataStringValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_CLASS), ""));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LEVEL), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_ANIHILUS), 0L));
 					
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE), 0L));
 					
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH_ITEM), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY_ITEM), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK_ITEM), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE_ITEM), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH_ITEM), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY_ITEM), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK_ITEM), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE_ITEM), 0L));
 					
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH_BONUS), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY_BONUS), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK_BONUS), 0L));
-					stm.setLong(index++, getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE_BONUS), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_STRENGTH_BONUS), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_DEXTERITY_BONUS), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK_BONUS), 0L));
+					stm.setLong(index++, MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE_BONUS), 0L));
 				}
-				stm.executeLargeUpdate();
+				stm.executeUpdate();
 			}
 		}
 	}
 	
 	
-	private static long getDataLongValue(Player player, String accessor, long def) {
-		int index = accessor.indexOf('|');
-		String type = accessor.substring(0, index);
-		accessor = accessor.substring(index+1);
-		
-		if ("metadata".equalsIgnoreCase(type)) {
-			index = accessor.indexOf('|');
-			String plugin = accessor.substring(0, index);
-			accessor = accessor.substring(index+1).replace("%player%", player.getName());
-			return player.getMetadata(accessor).parallelStream().filter(meta -> Optional.ofNullable(meta.getOwningPlugin()).filter(pl -> plugin.equals(pl.getName())).isPresent()).findAny().map(MetadataValue::asLong).orElse(def);
-		} else if ("skript".equalsIgnoreCase(type)) {
-			Object obj = Variables.getVariable(accessor.replace("%player%", player.getName()), null, false);
-			if (obj == null) return def;
-			if (obj instanceof Number) return ((Number) obj).longValue();
-			if (obj instanceof String) try { return Long.parseLong((String) obj); } catch (NumberFormatException e) {}
-			return def;
-		} else if ("placeholderapi".equalsIgnoreCase(type)) {
-			accessor = accessor.replace("%player%", player.getName());
-			final String acc = accessor;
-			return Optional.of(PlaceholderAPI.setPlaceholders(player, accessor)).filter(str -> acc.equalsIgnoreCase(str)).map(str -> {
-				try { Long.parseLong(str); } catch (NumberFormatException e) {} return (Long) null;
-			}).orElse(def);
+	/**
+	 * Save all given player data to database.
+	 * 
+	 * @implNote Thread unsafe.
+	 * @param players players to save
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public void savePlayerItems(@NotNull Player... players) throws SQLException {
+		this.checkConnection();
+		if (players.length == 0) return;
+		try (Connection conn = this.connect()) {
+			players = Stream.of(players).distinct().toArray(Player[]::new);
+			String metaName = "";
+			String pluginName = "";
+			players[0].getMetadata(metaName).parallelStream().filter(m -> pluginName.equals(m.getOwningPlugin().getName())).map(MetadataValue::asLong).findAny().orElse(null);
+			Variables.getVariable(metaName, null, false);
+			String sql = "INSERT INTO `rpg_items` (`uuid`, `max-mana`, `max-hp`, `main-hand`, `off-hand`, `hotbar_0`, `hotbar_1`, `hotbar_2`, `hotbar_3`, `hotbar_4`, `hotbar_5`, `hotbar_6`, `hotbar_7`, `hotbar_8`, `armor_0`, `armor_1`, `armor_2`, `armor_3`, `talizman_0`, `talizman_1`, `talizman_2`) VALUES %s ON DUPLICATE KEY UPDATE `max-mana` = VALUES(`max-mana`), `max-hp` = VALUES(`max-hp`), `main-hand` = VALUES(`main-hand`), `off-hand` = VALUES(`off-hand`), `hotbar_0` = VALUES(`hotbar_0`), `hotbar_1` = VALUES(`hotbar_1`), `hotbar_2` = VALUES(`hotbar_2`), `hotbar_3` = VALUES(`hotbar_3`), `hotbar_4` = VALUES(`hotbar_4`), `hotbar_5` = VALUES(`hotbar_5`), `hotbar_6` = VALUES(`hotbar_6`), `hotbar_7` = VALUES(`hotbar_7`), `hotbar_8` = VALUES(`hotbar_8`), `armor_0` = VALUES(`armor_0`), `armor_1` = VALUES(`armor_1`), `armor_2` = VALUES(`armor_2`), `armor_3` = VALUES(`armor_3`), `talizman_0` = VALUES(`talizman_0`), `talizman_1` = VALUES(`talizman_1`), `talizman_2` = VALUES(`talizman_2`)";
+			sql = String.format(sql, String.join(", ", Stream.of(players).parallel().map(p -> "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").toArray(String[]::new)));
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				int index = 1;
+				Config cfg = this.plugin.getConfiguration();
+				for (Player player : players) {
+					stm.setString(index++, player.getUniqueId().toString());
+					
+					stm.setInt(index++, MiscUtils.getDataIntValue(player, cfg.getString(ConfigKey.PLAYER_ITEM_VARIABLE_MAX_MANA), 0));
+					stm.setLong(index++, (long) player.getHealthScale());
+					stm.setInt(index++, player.getInventory().getHeldItemSlot());
+					
+					PlayerInventory inv = player.getInventory();
+					// off-hand
+					stm.setString(index++, Optional.ofNullable(inv.getItemInOffHand()).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+					// hotbar
+					for (int i = 0; i < 9; i++) {
+						stm.setString(index++, Optional.ofNullable(inv.getItem(i)).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+					}
+					// armor
+					ItemStack[] armor = inv.getArmorContents();
+					for (int i = 0; i < 4; i++) {
+						stm.setString(index++, Optional.ofNullable(armor[i]).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+					}
+					// talisman
+					for (int i = 0; i < 3; i++) {
+						stm.setString(index++, Optional.ofNullable(inv.getItem(17+(i*9))).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+					}
+					
+				}
+				stm.executeUpdate();
+			}
 		}
-		return def;
-	}
-	
-	
-	private static String getDataStringValue(Player player, String accessor, String def) {
-		int index = accessor.indexOf('|');
-		String type = accessor.substring(0, index);
-		accessor = accessor.substring(index+1);
-		
-		if ("metadata".equalsIgnoreCase(type)) {
-			index = accessor.indexOf('|');
-			String plugin = accessor.substring(0, index);
-			accessor = accessor.substring(index+1).replace("%player%", player.getName());
-			return player.getMetadata(accessor).parallelStream().filter(meta -> Optional.ofNullable(meta.getOwningPlugin()).filter(pl -> plugin.equals(pl.getName())).isPresent()).findAny().map(MetadataValue::asString).orElse(def);
-		} else if ("skript".equalsIgnoreCase(type)) {
-			Object obj = Variables.getVariable(accessor.replace("%player%", player.getName()), null, false);
-			if (obj == null) return def;
-			if (obj instanceof String) return (String) obj;
-			return obj.toString();
-		} else if ("placeholderapi".equalsIgnoreCase(type)) {
-			accessor = accessor.replace("%player%", player.getName());
-			final String acc = accessor;
-			return Optional.of(PlaceholderAPI.setPlaceholders(player, accessor)).filter(str -> acc.equalsIgnoreCase(str)).orElse(def);
-		}
-		return def;
 	}
 	
 	

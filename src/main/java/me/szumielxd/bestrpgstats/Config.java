@@ -16,11 +16,11 @@ import org.jetbrains.annotations.NotNull;
 public class Config {
 	
 	
-	private final BungeerpgStats plugin;
+	private final BestrpgStats plugin;
 	private final YamlConfiguration yaml;
 	private final File file;
 	
-	public Config(@NotNull BungeerpgStats plugin) {
+	public Config(@NotNull BestrpgStats plugin) {
 		this.plugin = plugin;
 		this.yaml = new YamlConfiguration();
 		this.file = new File(this.plugin.getDataFolder(), "config.yml");

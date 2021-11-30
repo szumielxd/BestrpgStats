@@ -13,10 +13,10 @@ import org.bukkit.entity.Player;
 public class MainCommand implements TabExecutor {
 	
 	
-	private final BungeerpgStats plugin;
+	private final BestrpgStats plugin;
 	
 	
-	public MainCommand(BungeerpgStats plugin) {
+	public MainCommand(BestrpgStats plugin) {
 		this.plugin = plugin;
 	}
 	
@@ -38,30 +38,34 @@ public class MainCommand implements TabExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length > 0) {
 			if (args[0].equalsIgnoreCase("save-all")) {
-				sender.sendMessage(BungeerpgStats.PREFIX + "Forcing update of LuckPerms groups data...");
-				this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
+				sender.sendMessage(BestrpgStats.PREFIX + "Forcing update of LuckPerms groups data...");
+				this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin.getInstance(), () -> {
 					this.plugin.getUsersUpdater().updateUsers();
-					sender.sendMessage(BungeerpgStats.PREFIX + "§aSuccessfully updated groups data.");
+					sender.sendMessage(BestrpgStats.PREFIX + "§aSuccessfully updated groups data.");
 				});
 				return true;
 			} else if (args[0].equalsIgnoreCase("save")) {
 				if (args.length == 2) {
 					Player pl = Bukkit.getPlayerExact(args[1]);
 					if (pl == null) {
-						sender.sendMessage(BungeerpgStats.PREFIX + String.format("§cCannot find player for §4%s§c.", args[1]));
+						sender.sendMessage(BestrpgStats.PREFIX + String.format("§cCannot find player for §4%s§c.", args[1]));
 						return true;
 					}
-					try {
-						this.plugin.getDB().savePlayerData(pl);
-						sender.sendMessage(BungeerpgStats.PREFIX + String.format("§aSuccessfully updated player data for %s.", pl.getName()));
-					} catch (SQLException e) {
-						sender.sendMessage(BungeerpgStats.PREFIX + String.format("§4An error occured while attempting to save player data. See console for more informations."));
-						e.printStackTrace();
-					}
+					this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin.getInstance(), () -> {
+						try {
+							this.plugin.getDB().savePlayerData(pl);
+							this.plugin.getDB().savePlayerItems(pl);
+							sender.sendMessage(BestrpgStats.PREFIX + String.format("§aSuccessfully updated player data for %s.", pl.getName()));
+						} catch (SQLException e) {
+							sender.sendMessage(BestrpgStats.PREFIX + String.format("§4An error occured while attempting to save player data. See console for more informations."));
+							e.printStackTrace();
+						}
+					});
+					return true;
 				}
 			}
 		}
-		sender.sendMessage(BungeerpgStats.PREFIX + String.format("Usage: §a/%s save|save-all", label));
+		sender.sendMessage(BestrpgStats.PREFIX + String.format("Usage: §a/%s save|save-all", label));
 		return true;
 	}
 

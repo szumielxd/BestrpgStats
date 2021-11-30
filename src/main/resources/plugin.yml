@@ -4,12 +4,12 @@ version: ${version}
 authors: [${author}]
 main: ${mainClass}
 website: ${parent.url}
-depend: [LuckPerms]
+depend: [PlaceholderAPI, Skript]
 
 api-version: 1.13
 
 commands:
-  lpgroupsync:
-    aliases: [lpsync]
+  bestrpgstats:
+    aliases: [rpgstats]
     usage: /<command>
     permission: lpgroupsync.command

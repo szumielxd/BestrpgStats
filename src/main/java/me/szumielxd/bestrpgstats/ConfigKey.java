@@ -28,6 +28,8 @@ public enum ConfigKey {
 	PLAYER_DATA_VARIABLE_DEXTERITY_BONUS("player.data-variable.dexterity-bonus", "metadata|Skript|stats_dexterity_bonus"),
 	PLAYER_DATA_VARIABLE_LUCK_BONUS("player.data-variable.luck-bonus", "metadata|Skript|stats_luck_bonus"),
 	PLAYER_DATA_VARIABLE_INTELLIGENCE_BONUS("player.data-variable.intelligence-bonus", "metadata|Skript|stats_intelligence_bonus"),
+	//
+	PLAYER_ITEM_VARIABLE_MAX_MANA("player.item-variable.max-mana", "metadata|Skript|stats_max_mana"),
 	;
 
 	private final String path;

@@ -38,7 +38,7 @@ public class NBTUtils {
 		keys.forEach(key -> {
 			Object value = ReflectionUtils.invokeMethod(ReflectionUtils.NBTTagCompound, nbt, "get", key);
 			if(ReflectionUtils.NBTTagCompound.isInstance(value)) json.add(key, getNBTToJson(value));
-			else if(ReflectionUtils.NBTTagCompound.isInstance(value)) json.add(key, getNBTListToList((ArrayList<?>) ReflectionUtils.getFieldValue(value, "list")));
+			else if(ReflectionUtils.NBTTagList.isInstance(value)) json.add(key, getNBTListToList((ArrayList<?>) ReflectionUtils.getFieldValue(value, "list")));
 			else json.add(key, getObjectToJson(ReflectionUtils.getFieldValue(value, "data")));
 		});
 		return json;
@@ -49,7 +49,7 @@ public class NBTUtils {
 		JsonArray arr = new JsonArray();
 		nbtList.parallelStream().map(nbt -> {
 			if(ReflectionUtils.NBTTagCompound.isInstance(nbt)) return getNBTToJson(nbt);
-			else if(ReflectionUtils.NBTTagCompound.isInstance(nbt)) return getNBTListToList((ArrayList<?>) ReflectionUtils.getFieldValue(nbt, "list"));
+			else if(ReflectionUtils.NBTTagList.isInstance(nbt)) return getNBTListToList((ArrayList<?>) ReflectionUtils.getFieldValue(nbt, "list"));
 			return getObjectToJson(ReflectionUtils.getFieldValue(nbt, "data"));
 		}).forEach(arr::add);
 		return arr;

@@ -6,10 +6,10 @@ import org.bukkit.entity.Player;
 public class UsersUpdater {
 	
 	
-	private final BungeerpgStats plugin;
+	private final BestrpgStats plugin;
 	
 	
-	public UsersUpdater(BungeerpgStats plugin) {
+	public UsersUpdater(BestrpgStats plugin) {
 		this.plugin = plugin;
 	}
 	
@@ -19,7 +19,9 @@ public class UsersUpdater {
 	 */
 	public void updateUsers() {
 		try {
-			this.plugin.getDB().savePlayerData(Bukkit.getOnlinePlayers().toArray(new Player[0]));
+			Player[] players = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+			this.plugin.getDB().savePlayerData(players);
+			this.plugin.getDB().savePlayerItems(players);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

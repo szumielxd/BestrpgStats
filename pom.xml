@@ -8,7 +8,7 @@
 	<properties>
 		<author>szumielxd</author>
 		<package>me.szumielxd.bestrpgstats</package>
-		<mainClass>${package}.BestrpgStats</mainClass>
+		<mainClass>${package}.BestrpgStatsBootstrap</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<build>
@@ -36,6 +36,11 @@
 						</manifest>
 						<manifestEntries>
 							<Created-By>${author}</Created-By>
+							<Launcher-Agent-Class>${package}.loader.LoadingAgent</Launcher-Agent-Class>
+							<Premain-Class>${package}.loader.LoadingAgent</Premain-Class>
+							<Agent-Class>${package}.loader.LoadingAgent</Agent-Class>
+							<Can-Redefine-Classes>true</Can-Redefine-Classes>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -66,6 +71,14 @@
 						<relocation>
 							<pattern>com.zaxxer</pattern>
 							<shadedPattern>${package}.lib.com.zaxxer</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>me.lucko.jarrelocator</pattern>
+							<shadedPattern>${package}.lib.me.lucko.jarrelocator</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>org.objectweb</pattern>
+							<shadedPattern>${package}.lib.org.objectweb</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>
@@ -109,6 +122,12 @@
 	</repositories>
 	<dependencies>
 		<dependency>
+			<groupId>me.lucko</groupId>
+			<artifactId>jar-relocator</artifactId>
+			<version>1.5</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>4.0.3</version>
@@ -120,7 +139,7 @@
 			<artifactId>mariadb-java-client</artifactId>
 			<version>2.7.4</version>
 			<type>jar</type>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
