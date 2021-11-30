@@ -1,17 +1,35 @@
 package me.szumielxd.bestrpgstats.utils;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import ch.njol.skript.variables.Variables;
 import me.clip.placeholderapi.PlaceholderAPI;
+import me.szumielxd.bestrpgstats.BestrpgStats;
+import me.szumielxd.bestrpgstats.ConfigKey;
 
 public class MiscUtils {
 	
 	
-	public static long getDataLongValue(Player player, String accessor, long def) {
+	private static Pattern TALISMAN_PATTERN;
+	
+	
+	public static void init(@NotNull BestrpgStats plugin) {
+		Objects.requireNonNull(plugin, "plugin cannot be null");
+		TALISMAN_PATTERN = Pattern.compile(plugin.getConfiguration().getString(ConfigKey.PLAYER_ITEM_TALISMAN_NAME_REGEX));
+	}
+	
+	
+	public static long getDataLongValue(@NotNull Player player, @NotNull String accessor, long def) {
+		Objects.requireNonNull(player, "player cannot be null");
+		Objects.requireNonNull(accessor, "accessor cannot be null");
 		int index = accessor.indexOf('|');
 		String type = accessor.substring(0, index);
 		accessor = accessor.substring(index+1);
@@ -37,7 +55,9 @@ public class MiscUtils {
 		return def;
 	}
 	
-	public static String getDataStringValue(Player player, String accessor, String def) {
+	public static @Nullable String getDataStringValue(@NotNull Player player, @NotNull String accessor, @Nullable String def) {
+		Objects.requireNonNull(player, "player cannot be null");
+		Objects.requireNonNull(accessor, "accessor cannot be null");
 		int index = accessor.indexOf('|');
 		String type = accessor.substring(0, index);
 		accessor = accessor.substring(index+1);
@@ -60,7 +80,9 @@ public class MiscUtils {
 		return def;
 	}
 	
-	public static int getDataIntValue(Player player, String accessor, int def) {
+	public static int getDataIntValue(@NotNull Player player, @NotNull String accessor, int def) {
+		Objects.requireNonNull(player, "player cannot be null");
+		Objects.requireNonNull(accessor, "accessor cannot be null");
 		int index = accessor.indexOf('|');
 		String type = accessor.substring(0, index);
 		accessor = accessor.substring(index+1);
@@ -84,6 +106,14 @@ public class MiscUtils {
 			}).orElse(def);
 		}
 		return def;
+	}
+	
+	
+	public static boolean isTalisman(@Nullable ItemStack item) {
+		if (item == null) return false;
+		if (!item.hasItemMeta()) return false;
+		if (!item.getItemMeta().hasDisplayName()) return false;
+		return TALISMAN_PATTERN.matcher(item.getItemMeta().getDisplayName()).matches();
 	}
 	
 

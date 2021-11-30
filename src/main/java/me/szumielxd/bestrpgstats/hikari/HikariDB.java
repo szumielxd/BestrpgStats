@@ -14,6 +14,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -26,6 +28,9 @@ import me.szumielxd.bestrpgstats.utils.MiscUtils;
 import me.szumielxd.bestrpgstats.utils.NBTUtils;
 
 public abstract class HikariDB {
+	
+	
+	private static Gson GSON_OUT_PARSER = new GsonBuilder().disableHtmlEscaping().disableInnerClassSerialization().create();
 	
 	
 	protected final BestrpgStats plugin;
@@ -230,19 +235,19 @@ public abstract class HikariDB {
 					
 					PlayerInventory inv = player.getInventory();
 					// off-hand
-					stm.setString(index++, Optional.ofNullable(inv.getItemInOffHand()).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+					stm.setString(index++, GSON_OUT_PARSER.toJson(Optional.ofNullable(inv.getItemInOffHand()).filter(is -> !Material.AIR.equals(is.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new)));
 					// hotbar
 					for (int i = 0; i < 9; i++) {
-						stm.setString(index++, Optional.ofNullable(inv.getItem(i)).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+						stm.setString(index++, GSON_OUT_PARSER.toJson(Optional.ofNullable(inv.getItem(i)).filter(is -> !Material.AIR.equals(is.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new)));
 					}
 					// armor
 					ItemStack[] armor = inv.getArmorContents();
 					for (int i = 0; i < 4; i++) {
-						stm.setString(index++, Optional.ofNullable(armor[i]).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+						stm.setString(index++, GSON_OUT_PARSER.toJson(Optional.ofNullable(armor[i]).filter(is -> !Material.AIR.equals(is.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new)));
 					}
 					// talisman
 					for (int i = 0; i < 3; i++) {
-						stm.setString(index++, Optional.ofNullable(inv.getItem(17+(i*9))).filter(it -> !Material.AIR.equals(it.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new).toString());
+						stm.setString(index++, GSON_OUT_PARSER.toJson(Optional.ofNullable(inv.getItem(17+(i*9))).filter(is -> MiscUtils.isTalisman(is)).filter(is -> !Material.AIR.equals(is.getType())).map(NBTUtils::getItemAsJson).orElseGet(JsonObject::new)));
 					}
 					
 				}

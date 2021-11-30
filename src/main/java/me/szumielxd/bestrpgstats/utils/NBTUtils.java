@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,7 +20,8 @@ public class NBTUtils {
 	
 	
 	
-	public static JsonObject getItemAsJson(ItemStack item) {
+	public static @NotNull JsonObject getItemAsJson(@Nullable ItemStack item) {
+		if (item == null) return new JsonObject();
 		try {
 			Object nms = ReflectionUtils.CraftItemStack_asNMSCopy.invoke(null, item);
 			Object nbt = ReflectionUtils.NBTTagCompound.getConstructor().newInstance();

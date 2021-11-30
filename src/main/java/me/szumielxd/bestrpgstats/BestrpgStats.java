@@ -2,6 +2,7 @@ package me.szumielxd.bestrpgstats;
 
 import java.util.Optional;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
@@ -11,6 +12,9 @@ import me.szumielxd.bestrpgstats.hikari.HikariDB;
 import me.szumielxd.bestrpgstats.hikari.MariaDB;
 import me.szumielxd.bestrpgstats.hikari.MysqlDB;
 import me.szumielxd.bestrpgstats.hikari.PoolOptions;
+import me.szumielxd.bestrpgstats.listeners.PlayerListener;
+import me.szumielxd.bestrpgstats.listeners.PortListener;
+import me.szumielxd.bestrpgstats.utils.MiscUtils;
 
 public class BestrpgStats extends BestrpgAbstractPlugin {
 	
@@ -21,6 +25,7 @@ public class BestrpgStats extends BestrpgAbstractPlugin {
 	private HikariDB database;
 	@Getter private Config configuration;
 	@Getter private UsersUpdater usersUpdater;
+	private PortListener portListener;
 	//@Getter private DependencyLoader dependencyLoader;
 	//@Getter private JarClassLoader jarClassLoader;
 	
@@ -69,8 +74,10 @@ public class BestrpgStats extends BestrpgAbstractPlugin {
 		ConfigurationSerialization.registerClass(DatabaseConfig.class);
 		ConfigurationSerialization.registerClass(PoolOptions.class);
 		this.configuration = new Config(this).init(ConfigKey.values());
+		MiscUtils.init(this);
 		//
 		this.getCommand("bestrpgstats").setExecutor(new MainCommand(this));
+		this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this.getInstance());
 		//
 		this.getLogger().info("Establishing connection with databases...");
 		this.database = Optional.of(this.getConfiguration().get(ConfigKey.DATABASES)).map(DatabaseConfig.class::cast)
@@ -78,13 +85,17 @@ public class BestrpgStats extends BestrpgAbstractPlugin {
 		//
 		this.usersUpdater = new UsersUpdater(this);
 		this.getServer().getScheduler().runTaskTimerAsynchronously(this.getInstance(), this.usersUpdater::updateUsers, 20L, 5*60*20L);
+		this.portListener = new PortListener(this);
+		this.portListener.startPortListener();
 	}
 	
 	
 	@Override
 	public void onDisable() {
+		this.portListener.stopPortListener();
 		ConfigurationSerialization.unregisterClass(DatabaseConfig.class);
 		ConfigurationSerialization.unregisterClass(PoolOptions.class);
+		HandlerList.unregisterAll(this.getInstance());
 		this.getServer().getScheduler().cancelTasks(this.getInstance());
 		if (this.database != null) this.database.shutdown();
 	}

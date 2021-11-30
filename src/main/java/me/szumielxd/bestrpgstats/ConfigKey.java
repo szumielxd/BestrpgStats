@@ -2,6 +2,7 @@ package me.szumielxd.bestrpgstats;
 
 import java.util.Collections;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.bestrpgstats.hikari.DatabaseConfig;
@@ -30,6 +31,11 @@ public enum ConfigKey {
 	PLAYER_DATA_VARIABLE_INTELLIGENCE_BONUS("player.data-variable.intelligence-bonus", "metadata|Skript|stats_intelligence_bonus"),
 	//
 	PLAYER_ITEM_VARIABLE_MAX_MANA("player.item-variable.max-mana", "metadata|Skript|stats_max_mana"),
+	PLAYER_ITEM_VARIABLE_MANA("player.item-variable.mana", "metadata|Skript|stats_mana"),
+	PLAYER_ITEM_TALISMAN_NAME_REGEX("player.talisman.name-regex", "§[0-9a-fA-Fk-orK-OR](.+Anihilus.+|Talizman)"),
+	
+	SERVER_QUERY_LISTENED_PORT("server.query.listened-port", 5920),
+	SERVER_QUERY_SECRET("server.query.secret", RandomStringUtils.randomAlphanumeric(32)),
 	;
 
 	private final String path;
