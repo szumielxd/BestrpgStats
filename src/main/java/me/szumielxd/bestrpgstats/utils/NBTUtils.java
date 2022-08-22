@@ -51,7 +51,7 @@ public class NBTUtils {
 	
 	public static JsonArray getNBTListToList(ArrayList<?> nbtList) {
 		JsonArray arr = new JsonArray();
-		nbtList.parallelStream().map(nbt -> {
+		nbtList.stream().map(nbt -> {
 			if(ReflectionUtils.NBTTagCompound.isInstance(nbt)) return getNBTToJson(nbt);
 			else if(ReflectionUtils.NBTTagList.isInstance(nbt)) return getNBTListToList((ArrayList<?>) ReflectionUtils.getFieldValue(nbt, "list"));
 			return getObjectToJson(ReflectionUtils.getFieldValue(nbt, "data"));
@@ -63,7 +63,7 @@ public class NBTUtils {
 	public static JsonObject jsonObjectDeepClone(JsonObject json) {
 		if(json == null) return null;
 		JsonObject newJson = new JsonObject();
-		json.entrySet().parallelStream().forEach(e -> {
+		json.entrySet().stream().forEach(e -> {
 			if(e.getValue().isJsonObject()) newJson.add(e.getKey(), jsonObjectDeepClone(e.getValue().getAsJsonObject()));
 			else if(e.getValue().isJsonArray()) newJson.add(e.getKey(), jsonArrayDeepClone(e.getValue().getAsJsonArray()));
 			else newJson.add(e.getKey(), e.getValue());
