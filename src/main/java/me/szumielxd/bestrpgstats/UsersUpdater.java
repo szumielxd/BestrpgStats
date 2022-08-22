@@ -3,6 +3,8 @@ package me.szumielxd.bestrpgstats;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import me.szumielxd.bestrpgstats.utils.MiscUtils;
+
 public class UsersUpdater {
 	
 	
@@ -19,7 +21,7 @@ public class UsersUpdater {
 	 */
 	public void updateUsers() {
 		try {
-			Player[] players = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+			Player[] players = Bukkit.getOnlinePlayers().parallelStream().filter(MiscUtils::isNotVanished).toArray(Player[]::new);
 			this.plugin.getDB().savePlayerData(players);
 			this.plugin.getDB().savePlayerItems(players);
 		} catch (Exception e) {
