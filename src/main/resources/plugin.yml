@@ -5,6 +5,7 @@ authors: [${author}]
 main: ${mainClass}
 website: ${parent.url}
 depend: [PlaceholderAPI, Skript]
+softdepend: [Essentials, VanishNoPacket]
 
 api-version: 1.13
 
