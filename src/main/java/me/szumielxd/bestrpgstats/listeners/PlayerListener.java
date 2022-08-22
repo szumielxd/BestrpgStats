@@ -1,7 +1,6 @@
 package me.szumielxd.bestrpgstats.listeners;
 
 import java.sql.SQLException;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import me.szumielxd.bestrpgstats.BestrpgStats;
+import me.szumielxd.bestrpgstats.utils.MiscUtils;
 
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
 public class PlayerListener implements Listener {
@@ -22,6 +22,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onQuit(@NotNull PlayerQuitEvent event) {
 		final Player player = event.getPlayer();
+		if (MiscUtils.isVanished(player)) return;
 		this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin.getInstance(), () -> {
 			try {
 				this.plugin.getDB().savePlayerData(player);
