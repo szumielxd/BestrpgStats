@@ -36,6 +36,7 @@ public enum ConfigKey {
 	
 	SERVER_QUERY_LISTENED_PORT("server.query.listened-port", 5920),
 	SERVER_QUERY_SECRET("server.query.secret", RandomStringUtils.randomAlphanumeric(32)),
+	SERVER_QUERY_DEBUG("server.query.debug", false),
 	;
 
 	private final String path;

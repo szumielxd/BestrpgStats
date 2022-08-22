@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +47,14 @@ public class Config {
 				this.yaml.save(this.file);
 			} else {
 				this.yaml.load(this.file);
+				AtomicInteger count = new AtomicInteger(0);
+				Stream.of(values).parallel().forEach(opt -> {
+					if (!this.yaml.isSet(opt.getPath())) {
+						count.addAndGet(1);
+						this.yaml.set(opt.getPath(), opt.getDefault());
+					}
+				});
+				if (count.get() > 0) this.yaml.save(this.file);
 			}
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
