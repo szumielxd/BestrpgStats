@@ -8,21 +8,25 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +50,7 @@ public class PortListener {
 	
 	
 	private void debug(@NotNull String format, @NotNull Object... args) {
-		this.plugin.getLogger().info(String.format(format, args));
+		if (this.plugin.getConfiguration().getBoolean(ConfigKey.SERVER_QUERY_DEBUG)) this.plugin.getLogger().info(String.format(format, args));
 	}
 	
 	
@@ -128,29 +132,30 @@ public class PortListener {
 				if (!plugin.getConfiguration().getString(ConfigKey.SERVER_QUERY_SECRET).equals(json.get("key").getAsString())) return;
 				debug("[%s] Password accepted", this.client);
 				if (json.has("action")) {
-					if (json.has("data") && json.get("data").isJsonObject()) {
-						JsonObject data = json.get("data").getAsJsonObject();
-						String action = json.get("action").getAsString().toUpperCase();
-						
-						// get_full_stats
-						if ("get_full_stats".equals(action)) {
-							debug("[%s] Recognised action: %s", this.client, "get_full_stats");
+				
+					String action = json.get("action").getAsString().toUpperCase();
+					
+					// get_full_stats
+					if ("GET_FULL_STATS".equals(action)) {
+						if (json.has("data") && json.get("data").isJsonObject()) {
+							JsonObject data = json.get("data").getAsJsonObject();
+							debug("[%s] Recognised action: %s", this.client, "GET_FULL_STATS");
 							Player player = Optional.of(data).map(d -> d.get("username")).filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(str -> {
 								try {
 									return plugin.getServer().getPlayer(UUID.fromString(str));
 								} catch (IllegalArgumentException e) {
 									return plugin.getServer().getPlayerExact(str);
 								}
-							}).orElse(null);
+							}).filter(MiscUtils::isNotVanished).orElse(null);
 							if (player != null) {
 								debug("[%s] Recognised user: %s", this.client, player.getName());
 								JsonObject res = new JsonObject();
 								JsonObject stats = new JsonObject();
 								res.add("stats", stats);
-								res.addProperty("action", "get_full_stats");
+								res.addProperty("action", "GET_FULL_STATS");
 								Config cfg = plugin.getConfiguration();
-								stats.addProperty("username", player.getName());
-								stats.addProperty("uuid", player.getUniqueId().toString());
+								res.addProperty("username", player.getName());
+								res.addProperty("uuid", player.getUniqueId().toString());
 								stats.addProperty("class", MiscUtils.getDataStringValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_CLASS), ""));
 								stats.addProperty("level", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LEVEL), 0L));
 								stats.addProperty("anihilus", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_ANIHILUS), 0L));
@@ -170,10 +175,10 @@ public class PortListener {
 								stats.addProperty("luck_bonus", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LUCK_BONUS), 0L));
 								stats.addProperty("intelligence_bonus", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_INTELLIGENCE_BONUS), 0L));
 								
-								res.addProperty("mana", MiscUtils.getDataIntValue(player, cfg.getString(ConfigKey.PLAYER_ITEM_VARIABLE_MANA), 0));
 								res.addProperty("maxMana", MiscUtils.getDataIntValue(player, cfg.getString(ConfigKey.PLAYER_ITEM_VARIABLE_MAX_MANA), 0));
-								res.addProperty("health", (long) player.getHealth());
-								res.addProperty("maxHealth", (long) player.getHealthScale());
+								res.addProperty("mana", MiscUtils.getDataIntValue(player, cfg.getString(ConfigKey.PLAYER_ITEM_VARIABLE_MANA), 0));
+								res.addProperty("maxHealth", (long) player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+								res.addProperty("health", (long) Math.min(player.getHealth(), res.get("maxHealth").getAsDouble()));
 								res.addProperty("mainHand", player.getInventory().getHeldItemSlot());
 								
 								PlayerInventory inv = player.getInventory();
@@ -185,7 +190,7 @@ public class PortListener {
 								res.add("hotbar", hotbar);
 								
 								JsonArray armor = new JsonArray();
-								Stream.of(inv.getArmorContents()).map(i -> Optional.ofNullable(i).filter(it -> !Material.AIR.equals(it.getType())).orElse(null)).map(NBTUtils::getItemAsJson).forEach(armor::add);
+								Lists.reverse(Arrays.asList(inv.getArmorContents())).stream().map(i -> Optional.ofNullable(i).filter(it -> !Material.AIR.equals(it.getType())).orElse(null)).map(NBTUtils::getItemAsJson).forEach(armor::add);
 								res.add("armor", armor);
 								
 								JsonArray talismans = new JsonArray();
@@ -197,26 +202,29 @@ public class PortListener {
 								this.out.write(result);
 							}
 						}
-						
-						// get_stats
-						if ("get_stats".equals(action)) {
-							debug("[%s] Recognised action: %s", this.client, "get_stats");
+					}
+					
+					// get_stats
+					if ("GET_STATS".equals(action)) {
+						if (json.has("data") && json.get("data").isJsonObject()) {
+							JsonObject data = json.get("data").getAsJsonObject();
+							debug("[%s] Recognised action: %s", this.client, "GET_STATS");
 							Player player = Optional.of(data).map(d -> d.get("username")).filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(str -> {
 								try {
 									return plugin.getServer().getPlayer(UUID.fromString(str));
 								} catch (IllegalArgumentException e) {
 									return plugin.getServer().getPlayerExact(str);
 								}
-							}).orElse(null);
+							}).filter(MiscUtils::isNotVanished).orElse(null);
 							if (player != null) {
 								debug("[%s] Recognised user: %s", this.client, player.getName());
 								JsonObject res = new JsonObject();
 								JsonObject stats = new JsonObject();
 								res.add("stats", stats);
-								res.addProperty("action", "get_stats");
+								res.addProperty("action", "GET_FULL_STATS");
 								Config cfg = plugin.getConfiguration();
-								stats.addProperty("username", player.getName());
-								stats.addProperty("uuid", player.getUniqueId().toString());
+								res.addProperty("username", player.getName());
+								res.addProperty("uuid", player.getUniqueId().toString());
 								stats.addProperty("class", MiscUtils.getDataStringValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_CLASS), ""));
 								stats.addProperty("level", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_LEVEL), 0L));
 								stats.addProperty("anihilus", MiscUtils.getDataLongValue(player, cfg.getString(ConfigKey.PLAYER_DATA_VARIABLE_ANIHILUS), 0L));
@@ -241,8 +249,20 @@ public class PortListener {
 								this.out.write(result);
 							}
 						}
-						
 					}
+					// get_online_players
+					if ("GET_ONLINE_PLAYERS".equals(action)) {
+						debug("[%s] Recognised action: %s", this.client, "GET_ONLINE_PLAYERS");
+						JsonObject res = new JsonObject();
+						JsonArray onlinePlayers = new JsonArray();
+						res.add("onlinePlayers", onlinePlayers);
+						res.addProperty("action", "GET_ONLINE_PLAYERS");
+						Bukkit.getOnlinePlayers().parallelStream().filter(MiscUtils::isNotVanished).map(Player::getName).map(JsonPrimitive::new).forEach(onlinePlayers::add);
+						String result = GSON_OUT_PARSER.toJson(res);
+						debug("[%s] Sent result: %s", this.client, result);
+						this.out.write(result);
+					}
+					
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
